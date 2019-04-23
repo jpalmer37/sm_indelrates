@@ -5,8 +5,8 @@ from glob import glob
 #listed sequences hinder the accurate formation of alignments
 #delete the specific sequences provided in the given lists to improve overall alignment quality
 
-cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_Conserved/*.fasta')
-vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/*.csv")
+cfolder = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/4_Conserved/*.fasta')
+vfolder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-V5mod/*.csv--")
 blacklist =  {"01_AE":['KP411841'],
               "02_AG":['KP411843'],
               "C": ['KU319547','KP411838','MF373131','KU319550','KU319539','MF373138'],
@@ -15,7 +15,7 @@ blacklist =  {"01_AE":['KP411841'],
 for infile in cfolder:
     fasta = open(infile,"r")
     
-    subtype = infile.split("/")[-1].split("_CR")[0]
+    subtype = infile.split("/")[-1].split(".")[0]
     data = parse_fasta(fasta)
     if subtype in blacklist:
 
@@ -25,7 +25,7 @@ for infile in cfolder:
                     print(i)
                     del data[i]
 
-    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_1_Edit/' + subtype + "_CR.fasta", 'w')
+    output_file = open('/home/jpalmer/PycharmProjects/hiv-evolution-master/4_1_Edited/' + subtype + ".fasta", 'w')
     for n in data.keys():
         output_file.write(">"+ n +"\n"+ data[n]+"\n")
 
@@ -36,7 +36,7 @@ for infile in vfolder:
     input = open(infile,"r")
 
     subtype = infile.split("/")[-1].split("_VR")[0]
-    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/' + subtype + "_VR.csv", 'w')
+    output_file = open('/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/' + subtype + ".csv", 'w')
 
     print(infile)
     if subtype in blacklist:

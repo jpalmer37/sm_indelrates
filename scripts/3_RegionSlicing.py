@@ -5,7 +5,7 @@ import sys
 from seqUtils import *
 
 #GP120 Reference sequence file
-rfile = open("./Phylo_Indels/hxb2_gp120_sequence.txt", 'r')
+rfile = open("/home/jpalmer/indelrates/scripts/hxb2_gp120_sequence.txt", 'r')
 
 gp120 = ''
 for i in rfile:
@@ -69,7 +69,7 @@ for infile in alignments:
                 ri += 1
 
         #Output
-        #_____________________________________________________
+        #----------------------------------------------------
 
         outputv.write(accno + ",")
         outputc.write(">" + header + "\n")

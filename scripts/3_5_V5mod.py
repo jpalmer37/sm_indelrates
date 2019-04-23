@@ -3,9 +3,8 @@ import subprocess
 from glob import glob
 from gotoh2 import *
 
-
 #nucleotide version of the reference sequence
-gp120 = open("./Phylo_Indels/hxb2_gp120_sequence.txt", 'r')
+gp120 = open("/home/jpalmer/indelrates/scripts/hxb2_gp120_sequence.txt", 'r')
 
 #load the gp120 reference 
 ntRef = ''
@@ -20,11 +19,11 @@ print(refv5)
 
 folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-pre/*.csv")
 
-for infile in folder:
+for infile in sorted(folder):
     print(infile)
     csv = open(infile,'r')
 
-    name = infile.split("/")[-1] + "_"
+    name = os.path.basename(infile) + "--"
 
     output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-V5mod/"+name, 'w')
 
