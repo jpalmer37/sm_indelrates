@@ -1,31 +1,28 @@
 from seqUtils import *
 import subprocess
+# TODO: use tempfile module
 from glob import glob
 from gotoh2 import *
 
-#nucleotide version of the reference sequence
-gp120 = open("/home/jpalmer/indelrates/scripts/hxb2_gp120_sequence.txt", 'r')
+refseq = """MRVKEKYQHLWRWGWRWGTMLLGMLMICSATEKLWVTVYYGVPVWKEATTTLFCASDAKAYDTEVHNVWATHACVPTDPN
+PQEVVLVNVTENFNMWKNDMVEQMHEDIISLWDQSLKPCVKLTPLCVSLKCTDLKNDTNTNSSSGRMIMEKGEIKNCSFN
+ISTSIRGKVQKEYAFFYKLDIIPIDNDTTSYKLTSCNTSVITQACPKVSFEPIPIHYCAPAGFAILKCNNKTFNGTGPCT
+NVSTVQCTHGIRPVVSTQLLLNGSLAEEEVVIRSVNFTDNAKTIIVQLNTSVEINCTRPNNNTRKRIRIQRGPGRAFVTI
+GKIGNMRQAHCNISRAKWNNTLKQIASKLREQFGNNKTIIFKQSSGGDPEIVTHSFNCGGEFFYCNSTQLFNSTWFNSTW
+STEGSNNTEGSDTITLPCRIKQIINMWQKVGKAMYAPPISGQIRCSSNITGLLLTRDGGNSNNESEIFRPGGGDMRDNWR
+SELYKYKVVKIEPLGVAPTKAKRRVVQREKR""".replace("\n",'')
 
-#load the gp120 reference 
-ntRef = ''
-for line in gp120:
-    ntRef += line.strip("\n")
+refv5 = refseq[456:473]
 
-#amino acid version of the reference sequence
-aaRef = translate_nuc(ntRef,0)
-refv5 = aaRef[456:473]
-print(aaRef)
-print(refv5)
+folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions_mod/*.csv")
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-pre/*.csv")
+for file in folder:
+    print(file)
+    csv = open(file,'r')
 
-for infile in sorted(folder):
-    print(infile)
-    csv = open(infile,'r')
+    name = file.split("/")[-1]
 
-    name = os.path.basename(infile) + "--"
-
-    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-V5mod/"+name, 'w')
+    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions_modTEST/"+name, 'w')
 
     for line in csv:
         line = line.split(",")
@@ -40,10 +37,14 @@ for infile in sorted(folder):
             pairwise.gap_open_penalty = 40
             pairwise.is_global = True
 
+
+
             result = pairwise.align(refv5, aav5)
 
             print(line[0])
+            #print(v5)
             print(aav5)
+
             print(result[0])
             print(result[1])
 
@@ -64,12 +65,10 @@ for infile in sorted(folder):
                     ri += 1
             #print(result[1][index[2] + 1:index[14]].replace("-", ''))
 
-            final = newv5[(index[2]+1)*3:((index[14])*3)].replace("-",'')   
-            # translate the position, 
-            # add 1 to make it 1-indexed so that you can multiply by 3, multiply by 3, apply to a 0-index slice, 
-            # result is the first nt of v5
+            final = newv5[(index[2]+1)*3:((index[14])*3)].replace("-",'')   #translate the position, add 1 to make it 1-indexed so that you can multiply by 3, multiply by 3, apply to a 0-index slice, result is the first nt of v5
 
             print(final)
+
             print('')
 
             output.write(",".join(line[0:5]) + ","+ final + "\n")

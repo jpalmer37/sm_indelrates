@@ -41,14 +41,13 @@ for path in folder:
 
 
     #read through each line and edit the dates
-    
     for line in file:
 
 
         info = line.strip("\n").split(",")
         accno = info[0]
         date = info[1]
-
+        datefill = date
         
         
         if "/" in line:
@@ -74,7 +73,7 @@ for path in folder:
                 dmy.append("0"+holder)
 
             date = dmy[0] + "-" + dmy[1] + "-" + dmy[2]
-
+            #datefill = date
         #Handles all normal dates with
         else:
             dmy = date.split("-")
@@ -84,14 +83,14 @@ for path in folder:
 
 
                 date = dmy[0]
-
+                #datefill = date + "-07-01"
 
             #'blank space' handling
             elif len(dmy) == 1 and dmy[0] == " ":
                 year = accdict[accno][0]
 
                 date = year
-
+                #datefill = year + "-07-01"
 
             #Aug-2008 format handling
             elif len(dmy) == 2:
@@ -105,6 +104,7 @@ for path in folder:
 
                 date = dmy[0] + "-" + dmy[1]
 
+                #datefill = date + "-15"
 
             #13-Aug-2008 format handling
             elif len(dmy) == 3:
@@ -117,4 +117,5 @@ for path in folder:
 
                 date = dmy[0] + "-" + dmy[1] + "-" + dmy[2]
 
+                #datefill = date
         output.write(accno + "," + date + "\n")

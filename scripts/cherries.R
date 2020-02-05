@@ -12,7 +12,8 @@ len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 
 # This code reads phylogenetic trees and variable loop sequences in csv format. 
 branch.lengths <- data.frame()
-
+genetic.dists <- data.frame()
+filtered.indels2 <- data.frame(stringsAsFactors = F)
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
   csv <- read.csv(vfolder[i], header=FALSE, stringsAsFactors = F)
@@ -40,7 +41,7 @@ for (i in 1:length(tfolder)){
   n <- Ntip(tre)
   
   # number of tips per internal node
-  # count the number of instances that first column (node) corresponds to a second column number which is <= n (meaning it is a tip)
+  # count the number of instances that first column (node) corresponds to a tip number in the second column which is <= n (meaning it is a tip)
   numtips <- tabulate(tre$edge[,1][tre$edge[,2] <= n])
   
   #determines which nodes contain cherries (returns vector with their integer positions)
@@ -71,13 +72,17 @@ for (i in 1:length(tfolder)){
   indels <- df[,c(6:9)]
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
-  
+  #genetic.dists <- rbind(genetic.dists, data.frame(accno=rep(subtype, nrow(indels)),tip1=indels$tip1.len,tip2=indels$tip2.len, cherry=indels$total.length, ))
   filtered.indels <- indels[indels$total.length != 0,]
   
   filtered.indels2 <- data.frame(stringsAsFactors = F)
+
+  
   indel2 <- data.frame(stringsAsFactors = F)
   nonindel2 <- data.frame(stringsAsFactors = F)
   lens <- c(0,78,120,108,102,33)
+  
+  
   
   count = 0
   #COUNT THROUGH EACH CHERRY PAIR LISTED IN FILTERED.INDELS
@@ -103,10 +108,7 @@ for (i in 1:length(tfolder)){
       
       #NAMES : bln, len, VR length
       names <- c(paste0("VR",as.character(t-1),".indel"), paste0("VR",as.character(t-1),".nt"), paste0("VR",as.character(t-1),".len"))
-      
-      
-      
-      
+
       #FILTER ----------------------------
       # ? greater than 15% 
       # length is less than 50% of the standard vloop length 
@@ -144,7 +146,7 @@ for (i in 1:length(tfolder)){
     } #COLUMNS END
     indel2 <- rbind(indel2, indel)
     nonindel2 <- rbind(nonindel2, nonindel)
-    filtered.indels2 <- rbind(filtered.indels2, filtered.indels[x,])
+    
     
     
   } #ROWS END 
@@ -171,9 +173,14 @@ for (i in 1:length(tfolder)){
     len.diff[[paste0(filename, ".VR",j,".six")]] <-  values == 6
     len.diff[[paste0(filename, ".VR",j,".nine")]] <-  values >= 9
   }
+  filtered.indels2 <- rbind(filtered.indels2, data.frame(subtype=rep(subtype,nrow(filtered.indels)),filtered.indels))
 
 }
-  
+
+# cross with the tree_dating file 
+#filtered.indels3 <- filtered.indels2[match(genetic.dists$tip1.label, filtered.indels2$tip1.label),]
+
+write.csv(filtered.indels2, "~/vindels/Pipeline_2_Within/filtered-indels.csv")
   
 #Used to load the indel.sizes data frame containing 3/6+ indel frequencies
 indel.sizes <- data.frame(stringsAsFactors = FALSE)
@@ -231,7 +238,6 @@ c$expected
 nrow(df3[which(df3$variable.loop=="V2" & df3$indel.size=="3"),])/nrow(df3[which(df3$variable.loop=="V2"),])
 
 require(vcd)
-library(gridGraphics)
 
 #par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
 
@@ -240,16 +246,16 @@ m <- mosaic(~variable.loop + indel.size, data=df3,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
-       margins=c(2,2,4,2),
+       margins=c(2,2,6,2),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=20),
-                            gp_varnames=gpar(fontsize=24),
+                            gp_labels=gpar(fontsize=24),
+                            gp_varnames=gpar(fontsize=28),
                             set_varnames = c(variable.loop="Variable Loop", 
                                              indel.size="Indel Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,90), just_labels=c("center","center","center","center")),
-       legend=legend_resbased(fontsize = 16, fontfamily = "",
-                       x = unit(0.2, "lines"), y = unit(3,"lines"),
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                       x = unit(0.5, "lines"), y = unit(2,"lines"),
                        height = unit(0.8, "npc"),
                        width = unit(1, "lines"), range=c(-10,10)),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
@@ -259,14 +265,14 @@ mosaic(~subtype + indel.size, data=df4,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",legend=F, 
-       margins=c(1,4,4,4),
+       margins=c(3,2,6,2),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T), 
-                            gp_labels=gpar(fontsize=17),
-                            gp_varnames=gpar(fontsize=24),
-                            set_varnames = c(subtype="Subtype", 
+                            gp_labels=gpar(fontsize=23),
+                            gp_varnames=gpar(fontsize=28),
+                            set_varnames = c(subtype="Clade", 
                                              indel.size="Indel Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,35,0), 
+                            offset_labels=c(0,0,-0.2,-0.1),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
 
 
