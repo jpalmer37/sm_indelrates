@@ -1,20 +1,17 @@
 import sys
 from glob import glob
 from seqUtils import *
-
 import os
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/hm-screen/*.fasta")
-count = 0
 
-for infile in folder:
+filename = snakemake.input[0] 
+filename = os.path.basename(filename).split('_aligned')[0]
 
-    name = infile.split("/")[6].split('.fasta')[0]
 
-    fasta = open(infile, "r")
-    print(os.path.basename(infile))
-    #list format
-    
+# First pass
+# Find all positions with less than 95% gaps (whitelist)
+with open(filename, "r") as fasta:
+
     transposed = transpose_fasta(convert_fasta(fasta))
 
     whitelist = []
@@ -27,33 +24,20 @@ for infile in folder:
         if freq < 0.95:
             whitelist.append(pos)
 
-    fasta.close()
+# Second pass
+# Write the positions in whitelist for all sequences
+with open(filename, "r") as fasta, open(snakemake.output[0],'w') as outfile:
 
+    data = parse_fasta3(fasta)
 
-    fasta = open(file, "r")
+    for header, seq in data:
+        fields = header.split(".")
 
-    data = parse_fasta(fasta)
-    count += len(data)
-    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/5_1_final/"+ name +"_.fasta",'w')
-
-    #dictionary format
-    
-    for i in data.keys():
-        accno = i[-8:]
-
-        if "." in accno:
-            accno = accno.split(".")[1]
-
-        seq2 = ''
-        for n, char in enumerate(data[i][:]):
+        outseq = ''
+        for n, char in enumerate(seq.copy()):
 
             if n in whitelist:
-                seq2 += char
+                outseq += char
 
-        output.write('>' + accno + "\n")
-        output.write(seq2 + "\n")
-
-
-    fasta.close()
-    output.close()
-print(count)
+        outfile.write('>' + header + "\n")
+        outfile.write(outseq + "\n")

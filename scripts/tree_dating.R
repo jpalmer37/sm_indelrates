@@ -15,6 +15,7 @@ n.days <- function(year, month) {
   }
   return(as.integer(difftime(end, start)))
 }
+
 mid.date <- function(lo, hi){
   mid <- as.integer(as.Date(lo,origin = "1970-01-01")) + as.integer(as.Date(hi,origin = "1970-01-01")-as.Date(lo,origin = "1970-01-01"))/2
   return (mid)
@@ -23,7 +24,6 @@ mid.date <- function(lo, hi){
 date.to.decimal <- function(dt) {
   return (as.double(dt) / 365.25 + 1970)
 }
-
 
 root.to.tip <- function(tre, vect, x){
   rtdtree <- tryCatch(
@@ -36,35 +36,9 @@ root.to.tip <- function(tre, vect, x){
   return (rtdtree)
 }
 
-get.range <- function(x) {
-  x = as.character(x)
-  items <- strsplit(x, '-')[[1]]
-  year <- items[1]
-  if (length(items) == 1) {
-    ## year only
-    low <- as.Date(paste(year, '01', '01', sep='-'))
-    high <- as.Date(paste(year, '12', '31', sep='-'))
-  } 
-  else if (length(items) == 2) {
-    ## year and month
-    month <- items[2]
-    
-    # determine number of days in this month
-    days <- n.days(year, month)
-    low <- as.Date(paste(year, month, '01', sep='-'))
-    high <- as.Date(paste(year, month, days, sep='-'))
-  } 
-  else {
-    # year, month, day
-    days <- items[3]
-    month <- items[2]
-    low <- as.Date(paste(year, month, days, sep='-'))
-    high <- low
-  }
-  return (c(low, high))
-}
-
 require(ape)
+
+args <- commandArgs()
 dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates/edit",full.names=TRUE)
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
 afolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/5_1_final", full.names=TRUE)

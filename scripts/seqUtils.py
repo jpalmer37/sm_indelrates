@@ -1,6 +1,6 @@
 import sys
 import re
-
+import csv
 import math
 import random
 
@@ -21,6 +21,16 @@ def convert_fasta (handle):
     result.append([h,sequence]) # handle last entry
     return result
 
+def write_fasta(fasta, filename):
+    with open(filename, 'w') as outfile:
+        for header, seq in fasta.items():
+            outfile.write(f">{header}\n{seq}\n")
+
+    
+def write_csv(csv, filename):
+    with open(filename, 'w') as outfile:
+        for fields in csv:
+            outfile.write(",".join(fields)+"\n")
 
 def parse_fasta(handle):
     """
@@ -44,6 +54,28 @@ def parse_fasta(handle):
             sequence += i.strip('\n').upper()
     res.update({h: sequence})
     return res
+
+def parse_fasta3(handle):
+    """
+    Parse open file as FASTA, return dictionary of 
+    headers and sequences as key-value pairs.
+    """
+    sequence = ''
+    h = ''
+    for i in handle:
+        if i[0] == '$': # skip h info
+            continue
+        elif i[0] == '>' or i[0] == '#':
+            if len(sequence) > 0:
+                yield h, sequence
+                sequence = ''   # reset containers
+                h = i.strip('\n')[1:]
+            else:
+                h = i.strip('\n')[1:]
+        else:
+            sequence += i.strip('\n').upper()
+    yield h, sequence
+
 
 def parse_fasta2(handle):
     # Modified parse fasta to return a dictionary of lists containing a tuple of the reference [0] and the query [1] sequences
