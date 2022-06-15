@@ -1,0 +1,4 @@
+data/input
+workflows/output
+.snakemake/
+scripts/__pycache__
