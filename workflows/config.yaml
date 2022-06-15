@@ -1,0 +1,6 @@
+datadir: "../data/input"
+outdir: "./output/"
+delimiter: "_"
+accno_pos: 1
+date_pos: 2
+na_char: "-"
