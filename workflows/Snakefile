@@ -1,0 +1,73 @@
+import os 
+from glob import glob
+import re
+
+configfile: "config.yaml"
+
+def get_output():
+    fastalist= glob("../data/conserved/*.fasta")
+    fastalist = ["filtered/conserved/"+os.path.basename(x).replace("_CR",'_filter') for x in fastalist]
+    csvlist= glob("../data/variable/*.csv")
+    csvlist = ["filtered/variable/"+ os.path.basename(x).replace("_VR",'_filter') for x in csvlist]
+    return fastalist, csvlist
+
+
+
+rule all:
+    input: 
+        config['outdir']+"/dates/A1_dates.tsv"
+
+rule pairwise_align:
+    input: 
+        fasta='../data/input/{sample}.fasta',
+        ref='../data/reference/hxb2_gp120_sequence.txt'
+    output:
+        fasta=config['outdir']+'/pair_aligned/{sample}_pairalign.fasta',
+        missing=config['outdir']+'/pair_aligned/{sample}_missing.txt'
+    threads:
+        6
+    script:
+        "../scripts/pairwise.py"
+
+rule sequencing_slicing:
+    input:
+        fasta=config['outdir']+'/pair_aligned/{sample}_pairalign.fasta',
+        ref='../data/reference/hxb2_gp120_sequence.txt'
+    output:
+        fasta=config['outdir']+"/split/conserved/{sample}_CR.fasta",
+        csv=config['outdir']+"/split/variable/{sample}_VR.csv",
+    params:
+        accno_pos=config['accno_pos'],
+        delimiter=config['delimiter']
+    script:
+        "../scripts/seq_slicing.py"
+
+rule sequence_filter:
+    input:
+        fasta=config['outdir']+"/split/conserved/{sample}_CR.fasta",
+        csv=config['outdir']+"/split/variable/{sample}_VR.csv"
+    output:
+        fasta=config['outdir']+"/filtered/conserved/{sample}_filter.fasta",
+        csv=config['outdir']+"/filtered/variable/{sample}_filter.csv",
+    script:
+        "../scripts/filter.py"
+
+rule msa:
+    input:
+        config['outdir']+"/filtered/conserved/{sample}_filter.fasta"
+    output:
+        config['outdir']+"/aligned/{sample}_filter.fasta"
+    threads:
+        6
+    shell:
+        """
+        mafft --auto --thread {threads} {input} > {output}
+        """
+
+rule date_retrieval:
+    input: 
+        config['outdir']+"/aligned/{sample}_filter.fasta"
+    output: 
+        config['outdir']+"/dates/{sample}_dates.tsv"
+    script:
+        "../scripts/dates.py"
